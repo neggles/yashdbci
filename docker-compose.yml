@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  yagpdb:
+    image: ghcr.io/neggles/yagpdb-oci/yagpdb:latest
+    restart: unless-stopped
+    env_file:
+      - app.env
+    environment:
+      YAGPDB_PQHOST: db
+      YAGPDB_PQUSERNAME: ${PG_USER:-postgres}
+      YAGPDB_PQPASSWORD: ${PG_PASSWORD:-postgres}
+      YAGPDB_PQDB: ${PG_DB:-yagpdb}
+      YAGPDB_REDIS: redis:6379
+
+    ports:
+      - mode: ingress
+        target: 80
+        published: ${YAG_HTTP_PORT:-6080}
+        protocol: tcp
+      - mode: ingress
+        target: 443
+        published: ${YAG_HTTPS_PORT:-6443}
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: ./data/yag/
+        target: /app/data
+      - type: bind
+        source: ./data/yag/cert
+        target: /app/cert
+      - type: bind
+        source: ./data/yag/soundboard
+        target: /app/soundboard
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+
+  redis:
+    container_name: yag-redis
+    image: redis/redis-stack-server:7.2.0-M01
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: ./data/redis/data
+        target: /data
+      - type: bind
+        source: ./data/redis/redis.conf
+        target: /redis-stack.conf
+        read_only: true
+    healthcheck:
+      disable: false
+      test: redis-cli --no-auth-warning ping | grep -q PONG
+      start_period: 5s
+      interval: 5s
+      retries: 3
+      timeout: 5s
+
+  db:
+    image: postgres:15-bullseye
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PG_USER:-postgres}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-postgres}
+      POSTGRES_DB: ${PG_DB:-yagpdb}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    user: 1000:1000
+    ports:
+      - mode: ingress
+        target: 5432
+        published: ${PG_HOST_PORT:-2027}
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: ./data/pgdata/
+        target: /var/lib/postgresql/data/
+    healthcheck:
+      disable: false
+      test: pg_isready -U ${PG_USER} -h 127.0.0.1
+      start_period: 5s
+      interval: 5s
+      retries: 3
+      timeout: 5s
+
+  pgadmin:
+    container_name: disco-pgadmin
+    image: dpage/pgadmin4:7
+    restart: unless-stopped
+    profiles:
+      - pgadmin
+      - dev
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_LISTEN_PORT: "5050"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: "30" # 10=DEBUG, 20=INFO, 30=WARN, 40=ERROR, 50=CRITICAL
+    volumes:
+      - type: bind
+        source: ./data/pgdata/pgadmin/
+        target: /var/lib/pgadmin/
+    ports:
+      - mode: ingress
+        target: 5050
+        published: ${PGADMIN_HOST_PORT:-5050}
+        protocol: tcp
+    depends_on:
+      db:
+        condition: service_started
+    healthcheck:
+      disable: false
+      test: [ "CMD", "nc", "-vz", "127.0.0.1", "5050" ]
+      start_period: 5s
+      interval: 5s
+      retries: 3
+      timeout: 5s

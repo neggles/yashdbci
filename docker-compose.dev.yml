@@ -1,0 +1,48 @@
+# Copy this file to `docker-compose.override.yml` to expose the DB and redis instances,
+# as well as spin up pgadmin4 and expose redis-stack.
+version: '3.8'
+
+services:
+  yagpdb:
+    # uncomment to use a local build of the image
+    #image: yagpdb-oci:local
+    # override the default set of commandline args here if you like
+    command:
+      - "-all"
+      - "-pa"
+      - "-exthttps=false"
+      - "-https=true"
+    depends_on:
+      # disable the healthy requirement for dev purposes
+      redis:
+        condition: service_started
+      db:
+        condition: service_started
+
+  db:
+    ports:
+      - mode: ingress
+        target: 5432
+        published: ${PG_HOST_PORT:-2027}
+        protocol: tcp
+
+  # Don't actually need this here, but it's here for completeness
+  pgadmin:
+    ports:
+      - mode: ingress
+        target: 5050
+        published: ${PGADMIN_HOST_PORT:-5050}
+        protocol: tcp
+
+  redis:
+    # the stack image adds a nice shiny webui which the stack-server image doesn't have
+    image: redis/redis-stack:7.2.0-M01
+    ports:
+      - mode: ingress
+        target: 6379
+        published: 6379
+        protocol: tcp
+      - mode: ingress
+        target: 8001
+        published: 8001
+        protocol: tcp

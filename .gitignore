@@ -128,3 +128,6 @@ go.work
 /docker-compose.override.yml
 /docker-compose.*override.yml
 /docker-compose.override*.yml
+
+# yagpdb local clone (for dev and GH CI)
+/yagpdb/

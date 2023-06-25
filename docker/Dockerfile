@@ -28,7 +28,7 @@ RUN git clone --depth=1 "${YAGPDB_REPO}" "yagpdb" \
 WORKDIR /work/yagpdb
 
 # Acquire deps
-RUN go mod download
+RUN go mod download -x
 
 # Move into yag build dir
 WORKDIR /work/yagpdb/cmd/yagpdb

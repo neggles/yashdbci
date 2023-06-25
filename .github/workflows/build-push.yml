@@ -64,7 +64,7 @@ jobs:
         id: tagger
         working-directory: yagpdb
         run: |
-          echo "tag=$(git describe --tags --abbrev=0)"" >> "$GITHUB_OUTPUT"
+          echo "tag=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         id: buildx
@@ -110,5 +110,6 @@ jobs:
             ${{ steps.meta.outputs.bake-file }}
           push: ${{ contains(fromJSON('["push", "schedule"]'), github.event_name) || inputs.force-push }}
           set: |
+            ${{ env.IMAGE_NAME }}.args.YAGPDB_REF=${{ steps.tagger.outputs.tag }}
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=min

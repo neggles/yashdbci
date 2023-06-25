@@ -41,8 +41,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     permissions:
-      packages: write
       contents: read
+      packages: write
 
     steps:
       - name: Checkout
@@ -83,10 +83,11 @@ jobs:
             org.opencontainers.image.description=Yet Another Self Hosted Discord Bot Docker Image
             org.opencontainers.image.vendor=neggles.dev
           tags: |
-            type=schedule,pattern={{date 'YYYYMMDD-hhmm' tz='UTC'}}
+            type=raw,value=latest,enable={{is_default_branch}}
             type=semver,pattern={{version}},value=${{ steps.tagger.outputs.tag }},enable={{is_default_branch}}
             type=semver,pattern={{major}}.{{minor}},value=${{ steps.tagger.outputs.tag }},enable={{is_default_branch}}
             type=semver,pattern={{major}},value=${{ steps.tagger.outputs.tag }},enable={{is_default_branch}}
+            type=schedule,pattern={{date 'YYYYMMDD-hhmm' tz='UTC'}}
             type=edge,branch=main
             type=ref,event=branch
             type=ref,event=pr

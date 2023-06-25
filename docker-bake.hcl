@@ -1,5 +1,5 @@
 group "default" {
-  targets = ["yashdbci"]
+  targets = ["yagpdb"]
 }
 
 variable "IMAGE_REGISTRY" {
@@ -7,7 +7,7 @@ variable "IMAGE_REGISTRY" {
 }
 
 variable "REPO_NAME" {
-  default = "neggles/yagpdbci"
+  default = "neggles/yashdbci"
 }
 
 variable "IMAGE_NAME" {
@@ -34,7 +34,7 @@ target "common" {
   platforms = ["linux/amd64"]
 }
 
-target "yashdbci" {
+target "yagpdb" {
   inherits = ["common", "docker-metadata-action"]
   context  = "docker"
   args = {

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   yagpdb:
-    image: ghcr.io/neggles/yagpdb-oci/yagpdb:latest
+    image: ghcr.io/neggles/yashdbci/yagpdb:latest
     restart: unless-stopped
     env_file:
       - app.env

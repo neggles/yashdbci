@@ -37,6 +37,7 @@ target "common" {
 target "yagpdb" {
   inherits = ["common", "docker-metadata-action"]
   context  = "."
+  dockerfile = "docker/Dockerfile"
   args = {
     CGO_ENABLED = "0"
     GOOS        = "linux"

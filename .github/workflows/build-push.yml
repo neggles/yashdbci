@@ -33,7 +33,7 @@ concurrency:
 env:
   YAGPDB_REF: master
   IMAGE_REGISTRY: ghcr.io
-  IMAGE_NAME: yashdbci
+  IMAGE_NAME: yagpdb
   IMAGE_PLATFORMS: "linux/amd64"
 
 jobs:
@@ -104,7 +104,7 @@ jobs:
         id: build-push
         uses: docker/bake-action@v3
         with:
-          targets: ${{ env.IMAGE_NAME }}
+          targets: default
           files: |
             ./docker-bake.hcl
             ${{ steps.meta.outputs.bake-file }}

@@ -1,5 +1,5 @@
 group "default" {
-  targets = ["yagpdb"]
+  targets = ["yashdbci"]
 }
 
 variable "IMAGE_REGISTRY" {
@@ -34,10 +34,9 @@ target "common" {
   platforms = ["linux/amd64"]
 }
 
-target "yagpdb" {
+target "yashdbci" {
   inherits = ["common", "docker-metadata-action"]
-  context  = "."
-  dockerfile = "docker/Dockerfile"
+  context  = "docker"
   args = {
     CGO_ENABLED = "0"
     GOOS        = "linux"

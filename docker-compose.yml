@@ -77,7 +77,7 @@ services:
         target: /var/lib/postgresql/data/
     healthcheck:
       disable: false
-      test: pg_isready -U ${PG_USER} -h 127.0.0.1
+      test: pg_isready -U ${PG_USER:-postgres}
       start_period: 5s
       interval: 5s
       retries: 3
